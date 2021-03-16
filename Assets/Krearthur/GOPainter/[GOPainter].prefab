@@ -1,0 +1,395 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2035126763994278543
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2035126763994278539}
+  - component: {fileID: 2035126763994278536}
+  - component: {fileID: 2450108177743738367}
+  - component: {fileID: 21983305180111946}
+  - component: {fileID: 28499325556500221}
+  - component: {fileID: 5572294290695061681}
+  - component: {fileID: 2035126763994278537}
+  - component: {fileID: 2035126764021217703}
+  - component: {fileID: 2035126764021217704}
+  - component: {fileID: 253555839}
+  - component: {fileID: 1318034485}
+  m_Layer: 0
+  m_Name: '[GOPainter]'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2035126763994278539
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035126763994278543}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2035126763994278536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035126763994278543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f4ece3e1a9f592419746582cc07d26f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  active: 0
+  mode: 0
+  canvasAxis: 1
+  paintObjects:
+  - {fileID: 5031257840504857414, guid: 395a012b689703f4784206747796ae46, type: 3}
+  - {fileID: 789580431107356566, guid: a4e4eb3df5384e945a8eb8922dca0cdc, type: 3}
+  - {fileID: 496841769447048282, guid: 9a8f21ee4bf4b1642a35e8aa77e8c7ed, type: 3}
+  - {fileID: 3400635389875273467, guid: 201397c1787b9284789d4914603ecbeb, type: 3}
+  - {fileID: 3571459167195635449, guid: 79f00eb615b8a52469522bfc077631d2, type: 3}
+  - {fileID: 8466313297055494288, guid: 5c11f4ab849016741a77888aacfb0208, type: 3}
+  - {fileID: 154356442682283624, guid: 1dfb0d24a6590034cac64fa2f18dcfd9, type: 3}
+  - {fileID: 291237974353550130, guid: 435767a7aff82c3448447ddef95c306b, type: 3}
+  - {fileID: 9197831201899055588, guid: 53b322b9927975545bb67415ca4be4f3, type: 3}
+  - {fileID: 6654728687783360882, guid: bd8af8f73f6acde4590ecab958f6e6ad, type: 3}
+  brushRadius: 0
+  density: 1
+  rotationStep: 15
+  levelSizeX: 1000
+  levelSizeY: 1000
+  levelSizeZ: 1000
+  preventCanvasBelow0: 1
+  snapToGrid: 0
+  snappingBase: 1
+  gridSize: {x: 1, y: 1, z: 1}
+  extraOffset: {x: 0, y: 0, z: 0}
+  dynamicGrid: 0
+  paintIgnoreColliding: 0
+  alignWithSurface: 1
+  raycastCanvasOnly: 1
+  alignWithStroke: 0
+  alignAxis: 2
+  drawLevelBoundaries: 0
+  drawCanvasBorder: 0
+  fillRect: 0
+  placeOffset: {x: 0, y: 0, z: 0}
+  padding: 2
+  scaleMinMax: {x: 0.1, y: 10}
+  sameScaleForObjects: 0
+  editLayer: Ignore Raycast
+  canvasLayer: Water
+  canvasTransparent: 0
+  rootGroupObjectName: '[LevelTiles]'
+  paintCanvasName: '[GOP-Canvas]'
+  sampleScreenDistance: 20
+  enableSounds: 1
+  showInfoBar: 1
+  MASK_ONLY_OBJECTS: -21
+  MASK_CANVAS_ONLY: 16
+  MASK_EDITLAYER_ONLY: 4
+  paintCanvas: {fileID: 0}
+--- !u!114 &2450108177743738367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035126763994278543}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7803277bc982d114f98c42cc069e51f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  randomPosition: 0
+  individualAxisPos: 1
+  minPositionDelta: {x: -2, y: 0, z: -5}
+  maxPositionDelta: {x: 2, y: 0, z: 5}
+  randomRotation: 1
+  individualAxisRot: 1
+  minEulerDelta: {x: 0, y: -180, z: 0}
+  maxEulerDelta: {x: 0, y: 180, z: 0}
+  fixRotationStep: {x: 0, y: 0, z: 0}
+  randomScale: 1
+  individualAxisScale: 0
+  minScaleDelta: {x: -0.2, y: -0.2, z: -0.2}
+  maxScaleDelta: {x: 0.2, y: 0.2, z: 0.2}
+  brightnessVariation: 0
+  dontChangeAlpha: 1
+  darkestValue: 0.8
+  brightestValue: 1.2
+  randomizeChildren: 0
+--- !u!114 &21983305180111946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035126763994278543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f8b3e241ec5f4147a70af7cf9de9a59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHeightToCastDownFrom: 30
+--- !u!114 &28499325556500221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035126763994278543}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab4679814b6bd5c46ac9ab87e76d0fe5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  paintObjectIds: 020000000300000004000000
+  currentIndex: 0
+  mode: 1
+--- !u!114 &5572294290695061681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035126763994278543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 534f8ce9f1cbc16459933b3e76f8bcb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!82 &2035126763994278537
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035126763994278543}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 0.463
+  m_Pitch: 0.75
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 2
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1.005983
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0.9824829
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &2035126764021217703
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035126763994278543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1662b34e10904334db822d995de8c28c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectToCreate: {fileID: 5031257840504857414, guid: 395a012b689703f4784206747796ae46,
+    type: 3}
+  group: {fileID: 0}
+  relativePos: 0
+  appendChargeNumber: 1
+  appendIndexNumber: 0
+  createUnderGroup: 1
+  positionOffset: {x: 0, y: 0, z: 0}
+  objectEuler: {x: -0, y: 0, z: 0}
+  objectScale: {x: 1, y: 1, z: 1}
+  objectLimit: 5000
+  upAxis: {x: 0, y: 1, z: 0}
+  charge: 16
+--- !u!114 &2035126764021217704
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035126763994278543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75618d909021779459e801ac4e248f35, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  segmentFactory: {fileID: 2035126764021217703}
+  numberOfSegments: 4
+  start: {fileID: 2035126763994278539}
+  target: {fileID: 0}
+  startPos: {x: -18.031197, y: 0.005, z: 39.730663}
+  endPos: {x: -17.117168, y: 0.005, z: 43.58365}
+  produceOnUpdate: 0
+  useAbsolutePositions: 1
+  snapToGrid: 0
+  gridSize: {x: 1, y: 1, z: 1}
+  alignObjects: 0
+  startOffset: {x: 0, y: 0, z: 0}
+  targetOffset: {x: 0, y: 0, z: 0}
+  trimStart: 0
+  trimEnd: 1
+  calculateNumberByPaddingAndDistance: 1
+  padding: 2
+  animate: 0
+  animationTimer: 0
+  animationSpeed: 2
+  debugDraw: 0
+--- !u!114 &253555839
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035126763994278543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66d6653041ea89949bacedfcb1b53792, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  segmentFactory: {fileID: 2035126764021217703}
+  rows: 7
+  columns: 9
+  start: {fileID: 2035126763994278539}
+  target: {fileID: 0}
+  startPos: {x: -22.371937, y: 3.005, z: 37.340942}
+  endPos: {x: -13.722045, y: 3.005, z: 44.306015}
+  produceOnUpdate: 0
+  useAbsolutePositions: 1
+  snapToGrid: 0
+  fill: 0
+  alignObjects: 0
+  gridSize: {x: 1, y: 1, z: 1}
+  startOffset: {x: 0, y: 0, z: 0}
+  targetOffset: {x: 0, y: 0, z: 0}
+  axis: 1
+  calculateNumberByPaddingAndDistance: 1
+  padding: 2
+  debugDraw: 0
+--- !u!114 &1318034485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035126763994278543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5f851b260ec9d9449ef146ab75dcaca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  segmentFactory: {fileID: 2035126764021217703}
+  steps: 10
+  degrees: 360
+  degreesOffset: 0
+  start: {fileID: 2035126763994278539}
+  target: {fileID: 0}
+  startPos: {x: -78.78546, y: -23.379276, z: 44.995}
+  endPos: {x: -57.606136, y: -42.319057, z: 44.995}
+  forceEven: 0
+  fill: 0
+  produceOnUpdate: 0
+  useAbsolutePositions: 1
+  snapToGrid: 0
+  gridSize: {x: 1, y: 1, z: 1}
+  alignWithNormal: 1
+  startOffset: {x: 0, y: 0, z: 0}
+  targetOffset: {x: 0, y: 0, z: 0}
+  axis: 2
+  correctionRatio: 0
+  calculateNumberByPaddingAndDistance: 1
+  padding: 2
+  drawEllipses: 0
+  drawNormals: 0
+  drawCenter: 0

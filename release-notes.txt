@@ -1,0 +1,18 @@
+
+Version 1.4
++ Fix: Support for arbitrary large scenes and terrains!
++ Fix: No objects are placed when cursor does not hit any surface to paint on
++ Improvement: Cleaned up options for more screen space and better clarity
++ Improvement: Renamed options and improved description of options for better clarity
++ Improvement: Info message when cursor does not hit any surface to paint on
+
+Version 1.3 
++ New option to automatically set a terrains layer, so you can start painting on terrains without further configuration
++ Fix scaling issue of prefabs
++ Fix error when using randomizer with nested prefabs
+
+Version 1.2
++ Improvement: It is now possible to move around the scene with right-click + WASD while using GO Painter
++ The "extraOffset" property is now applied in Snapping Mode "Pivot" which was not the case before
++ two new C# events OnUndoRemove and OnBeforeUndoAdd for more extension possibilites
++ fix regarding collision checks of nested objects

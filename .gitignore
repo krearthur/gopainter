@@ -1,0 +1,44 @@
+# =============== #
+# Unity generated #
+# =============== #
+[tT]emp/
+[oO]bj/
+UnityGenerated/
+/Library/
+LICENSE
+ 
+# ===================================== #
+# Visual Studio / MonoDevelop generated #
+# ===================================== #
+ExportedObj/
+*.svd
+*.userprefs
+*.csproj
+*.pidb
+*.suo
+*.sln
+*.user
+*.unityproj
+*.booproj
+.vs
+*.code-workspace
+ 
+# ============ #
+# OS generated #
+# ============ #
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# =========== #
+Custom Files / folders that should not be in repo
+# ========== #
+Assets/Standard Assets/
+AssetStoreTools*
+Build/
+bin/

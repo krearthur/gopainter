@@ -1,0 +1,4 @@
+When GOPainter is active, in Unity 2019, there might occur some 
+exceptions in the Console. This seems to be a bug in Unity:
+
+https://forum.unity.com/threads/clearpreviewcache-error.714896/
