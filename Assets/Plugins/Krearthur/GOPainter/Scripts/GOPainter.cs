@@ -165,17 +165,21 @@ namespace Krearthur.GOP
         public bool autoSetTerrainLayer = true;
 
         // -- Logic --
+        public float CanvasPositionX => canvasPositionX;
         protected float canvasPositionX = 0;
+        public float CanvasPositionY => canvasPositionY;
         protected float canvasPositionY = 0;
+        public float CanvasPositionZ => canvasPositionZ;
         protected float canvasPositionZ = 0;
+
         protected int prefabId = 0;
-        public int PrefabID { get { return prefabId; } }
+        public int PrefabID => prefabId;
         protected CanvasAxis axisBefore;
         protected SnappingBase snappingBaseBefore;
         protected Vector3 startingEulerAngles;
         protected Vector3 currentRotationDelta = Vector3.zero;
         protected Vector3 currentScale = Vector3.one;
-        protected bool SnapToGrid { get { return (snapToGrid); } }
+        protected bool SnapToGrid { get { return snapToGrid; } }
         protected bool wasGrid;
         protected bool camAxisPolarityInverted;
         protected bool wasCamAxisPolarityInverted;
@@ -222,22 +226,6 @@ namespace Krearthur.GOP
         public event Action<List<GameObject>> OnBeforeUndoAdded;
         public event Action<List<GameObject>> OnUndoRemoved;
 
-        // -- Resources --
-        protected AudioClip placeSound;
-        protected Texture2D cursor;
-        protected Texture2D cursorLine;
-        protected Texture2D cursorLineDelete;
-        protected Texture2D cursorRect;
-        protected Texture2D cursorRectFill;
-        protected Texture2D cursorRectDelete;
-        protected Texture2D cursorCircle;
-        protected Texture2D cursorCircleFill;
-        protected Texture2D cursorCircleDelete;
-        protected Texture2D cursorDelete;
-        protected Texture2D cursorPick;
-        protected Material canvasMaterial;
-        protected Material brushMaterial;
-
         // -- State --
         protected bool alt;
         protected bool control;
@@ -282,8 +270,10 @@ namespace Krearthur.GOP
         protected RectFactory rectFactory;
         protected CircleFactory circleFactory;
         protected ObjectFactory objectFactory;
-        protected new AudioSource audio;
         [SerializeField] protected Stack<PaintAction> history;
+
+        protected GOPResources resources = new();
+        protected GOPAudio audio = new();
 
         // -- References --
         protected SceneView scene;
@@ -292,7 +282,6 @@ namespace Krearthur.GOP
         protected GameObject holdingObject;
         protected GameObject selectedPrefab;
         protected GameObject parkedPicked;
-        protected GameObject brushPrefab;
         protected GameObject circleBrush;
         protected Color brushColorBefore;
         protected Terrain lastFoundTerrain;
@@ -349,7 +338,7 @@ namespace Krearthur.GOP
                         mouseWorldPos.y,
                         mouseWorldPos.z);
             }
-            else if(canvasAxis == CanvasAxis.Y)
+            else if (canvasAxis == CanvasAxis.Y)
             {
                 paintCanvas.transform.position = new Vector3(
                         mouseWorldPos.x,
@@ -372,41 +361,21 @@ namespace Krearthur.GOP
         {
             if (!Application.isPlaying)
             {
-                if (history == null) history = new Stack<PaintAction>();
+                if (history == null)
+                {
+                    history = new Stack<PaintAction>();
+                }
                 active = false;
                 InitDrawModes();
                 //CleanObjectGroups();
                 SceneView.duringSceneGui += OnScene;
-                LoadAssets();
+                resources.LoadResources();
             }
             else
             {
                 OnDeactivation();
                 Destroy(gameObject);
             }
-        }
-
-        protected void LoadAssets()
-        {
-            string basePath = "Assets/Krearthur/GOPainter/Resources/";
-
-            cursor = AssetDatabase.LoadAssetAtPath<Texture2D>(basePath + "paint.png");
-            cursorDelete = AssetDatabase.LoadAssetAtPath<Texture2D>(basePath + "paint_delete.png");
-            cursorLine = AssetDatabase.LoadAssetAtPath<Texture2D>(basePath + "paint_line.png");
-            cursorLineDelete = AssetDatabase.LoadAssetAtPath<Texture2D>(basePath + "paint_line_delete.png");
-            cursorRect = AssetDatabase.LoadAssetAtPath<Texture2D>(basePath + "paint_rect.png");
-            cursorRectFill = AssetDatabase.LoadAssetAtPath<Texture2D>(basePath + "paint_rect_fill.png");
-            cursorRectDelete = AssetDatabase.LoadAssetAtPath<Texture2D>(basePath + "paint_rect_delete.png");
-            cursorCircle = AssetDatabase.LoadAssetAtPath<Texture2D>(basePath + "paint_circle.png");
-            cursorCircleFill = AssetDatabase.LoadAssetAtPath<Texture2D>(basePath + "paint_circle_fill.png");
-            cursorCircleDelete = AssetDatabase.LoadAssetAtPath<Texture2D>(basePath + "paint_circle_delete.png");
-            cursorPick = AssetDatabase.LoadAssetAtPath<Texture2D>(basePath + "paint_pick.png");
-
-            canvasMaterial = AssetDatabase.LoadAssetAtPath<Material>(basePath + "PaintCanvasMat.mat");
-            brushMaterial = AssetDatabase.LoadAssetAtPath<Material>(basePath + "PaintBrushMat.mat");
-
-            brushPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(basePath + "BrushRadius.prefab");
-            placeSound = AssetDatabase.LoadAssetAtPath<AudioClip>(basePath + "blop.ogg");
         }
 
         protected void OnDisable()
@@ -443,7 +412,7 @@ namespace Krearthur.GOP
             lastTool = Tools.current;
             Tools.current = Tool.None;
             transform.position = new Vector3(10000, 10000, 10000);
-            Cursor.SetCursor(cursor, new Vector2(0, 31), CursorMode.Auto);
+            Cursor.SetCursor(resources.cursor, new Vector2(0, 31), CursorMode.Auto);
             currentRotationDelta = Vector3.zero;
             groupRoot = GameObject.Find(rootGroupObjectName);
             if (groupRoot == null)
@@ -454,13 +423,9 @@ namespace Krearthur.GOP
 
             CleanObjectGroups(true);
 
-            if (!TryGetComponent(out AudioSource audioSource))
+            if (enableSounds)
             {
-                audio = gameObject.AddComponent<AudioSource>();
-            }
-            else
-            {
-                audio = audioSource;
+                audio.Init(this, resources);
             }
 
             paintCanvas = GameObject.Find(paintCanvasName);
@@ -468,14 +433,14 @@ namespace Krearthur.GOP
             {
                 paintCanvas = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
-                paintCanvas.GetComponent<Renderer>().sharedMaterial = canvasMaterial;
+                paintCanvas.GetComponent<Renderer>().sharedMaterial = resources.canvasMaterial;
                 paintCanvas.GetComponent<Renderer>().enabled = !hideCanvas;
                 paintCanvas.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 paintCanvas.AddComponent<PaintCanvas>();
                 paintCanvas.hideFlags = HideFlags.HideInHierarchy;
                 paintCanvas.name = paintCanvasName;
                 paintCanvas.layer = LayerMask.NameToLayer(canvasLayer);
-                paintCanvas.transform.SetParent(groupRoot.transform, true);    
+                paintCanvas.transform.SetParent(groupRoot.transform, true);
             }
             UpdatePaintCanvasSize();
 
@@ -483,7 +448,7 @@ namespace Krearthur.GOP
 
             parkedPicked = null;
             selectedPrefab = null;
-            if (prefabId < 0) prefabId = 0;
+            prefabId = 0;
 
             currentScale = paintObjects[prefabId].transform.localScale;
             SwitchPrefab(prefabId);
@@ -505,7 +470,7 @@ namespace Krearthur.GOP
         protected void CheckForTerrains()
         {
             // Adjust level size according to found terrins
-            foreach(Terrain t in FindObjectsOfType<Terrain>())
+            foreach (Terrain t in FindObjectsOfType<Terrain>())
             {
                 lastFoundTerrain = t;
 
@@ -542,7 +507,9 @@ namespace Krearthur.GOP
                     for (int ib = 0; ib < brushes.Length; ib++)
                     {
                         if (ib == 0)
+                        {
                             circleBrush = brushes[ib].gameObject;
+                        }
                         if (ib > 0)
                         {
                             DestroyImmediate(brushes[ib].gameObject);
@@ -558,22 +525,19 @@ namespace Krearthur.GOP
                     CreateCircleBrush();
                 }
             }
-            else
+            else if (circleBrush != null)
             {
-                if (circleBrush != null)
-                {
-                    DestroyImmediate(circleBrush);
-                }
+                DestroyImmediate(circleBrush);
             }
         }
 
         protected void CreateCircleBrush()
         {
-            circleBrush = (GameObject)PrefabUtility.InstantiatePrefab(brushPrefab);
+            circleBrush = (GameObject)PrefabUtility.InstantiatePrefab(resources.brushPrefab);
             circleBrush.transform.localScale = new Vector3(0, 1f, 0);
             circleBrush.GetComponent<Collider>().enabled = false;
             circleBrush.layer = LayerMask.NameToLayer(editLayer);
-            circleBrush.GetComponent<Renderer>().sharedMaterial = brushMaterial;
+            circleBrush.GetComponent<Renderer>().sharedMaterial = resources.brushMaterial;
             circleBrush.name = "[Brush]";
             //circleBrush.hideFlags = HideFlags.HideInHierarchy;
             circleBrush.SetActive(false);
@@ -603,7 +567,10 @@ namespace Krearthur.GOP
             if (paintCanvas == null)
             {
                 PaintCanvas test = GameObject.FindObjectOfType<PaintCanvas>();
-                if (test != null) paintCanvas = test.gameObject;
+                if (test != null)
+                {
+                    paintCanvas = test.gameObject;
+                }
             }
 
             if (Application.isPlaying)
@@ -736,9 +703,18 @@ namespace Krearthur.GOP
             if (circleBrush != null && mode == OperationMode.Freehand && (!alt))
             {
                 circleBrush.transform.position = mouseWorldPos;
-                if (canvasAxis == CanvasAxis.X) circleBrush.transform.eulerAngles = new Vector3(0, 0, 90);
-                else if (canvasAxis == CanvasAxis.Y) circleBrush.transform.eulerAngles = new Vector3(0, 0, 0);
-                else if (canvasAxis == CanvasAxis.Z) circleBrush.transform.eulerAngles = new Vector3(90, 0, 0);
+                if (canvasAxis == CanvasAxis.X)
+                {
+                    circleBrush.transform.eulerAngles = new Vector3(0, 0, 90);
+                }
+                else if (canvasAxis == CanvasAxis.Y)
+                {
+                    circleBrush.transform.eulerAngles = new Vector3(0, 0, 0);
+                }
+                else if (canvasAxis == CanvasAxis.Z)
+                {
+                    circleBrush.transform.eulerAngles = new Vector3(90, 0, 0);
+                }
             }
 
             // If mouse screen position difference is bigger than sample rate => take a new sample!
@@ -770,14 +746,25 @@ namespace Krearthur.GOP
             if (selectedPrefab == null)
             {
                 extraInfoText = "Please put at least a GameObject in Element 0 of the 'Paint Objects' array.";
-
             }
             else
             {
-                if (cursorHasNoSurface) extraInfoText = "--- Cursor is outside any surface to paint on ---";
-                else if (mode == OperationMode.Circle) extraInfoText = circleInfo;
-                else if (mode == OperationMode.Scale) extraInfoText = scaleInfo;
-                else extraInfoText = controlInfo;
+                if (cursorHasNoSurface)
+                {
+                    extraInfoText = "--- Cursor is outside any surface to paint on ---";
+                }
+                else if (mode == OperationMode.Circle)
+                {
+                    extraInfoText = circleInfo;
+                }
+                else if (mode == OperationMode.Scale)
+                {
+                    extraInfoText = scaleInfo;
+                }
+                else
+                {
+                    extraInfoText = controlInfo;
+                }
 
                 if (IsCursorInSceneView(e))
                 {
@@ -901,10 +888,7 @@ namespace Krearthur.GOP
         {
             List<Transform> deleteMe = new List<Transform>();
 
-            if (groupRoot == null)
-            {
-                return;
-            }
+            if (groupRoot == null) return;
 
             objectGroups?.Clear();
             if (isOnActivation && objectGroups == null)
@@ -1079,8 +1063,14 @@ namespace Krearthur.GOP
                         objectFactory.group = holdingObject.transform.parent;
                         objectFactory.upAxis = GetCanvasAxis();
                         Transform rotationBody = holdingObject.transform.Find("Center");
-                        if (rotationBody != null) objectFactory.objectEuler = rotationBody.eulerAngles;
-                        else objectFactory.objectEuler = holdingObject.transform.eulerAngles;
+                        if (rotationBody != null)
+                        {
+                            objectFactory.objectEuler = rotationBody.eulerAngles;
+                        }
+                        else
+                        {
+                            objectFactory.objectEuler = holdingObject.transform.eulerAngles;
+                        }
                     }
                     switch (mode)
                     {
@@ -1108,7 +1098,7 @@ namespace Krearthur.GOP
                     e.Use();
                 }
             }
-            
+
             // Left Mouse UP 
             else if (e.type == EventType.MouseUp && e.button == 0 && !cursorHasNoSurface)
             {
@@ -1164,8 +1154,14 @@ namespace Krearthur.GOP
                 }
                 else
                 {
-                    if (mode == OperationMode.Scale) CancelScaleMode(true);
-                    else PickObjectOnCursor(e);
+                    if (mode == OperationMode.Scale)
+                    {
+                        CancelScaleMode(true);
+                    }
+                    else
+                    {
+                        PickObjectOnCursor(e);
+                    }
                 }
 
             }
@@ -1306,6 +1302,7 @@ namespace Krearthur.GOP
                 {
                     alignWithStroke = true;
                 }
+
                 if (!alignWithSurface)
                 {
                     if (parkedPicked != null)
@@ -1318,7 +1315,7 @@ namespace Krearthur.GOP
                     }
                 }
                 UpdateOffsetForObject(holdingObject);
-                PlaySoundRotate();
+                audio.PlaySoundRotate();
                 e.Use();
             }
 
@@ -1333,7 +1330,7 @@ namespace Krearthur.GOP
                 {
                     alignAxis++;
                 }
-                PlaySoundRotate();
+                audio.PlaySoundRotate();
                 e.Use();
             }
 
@@ -1342,7 +1339,7 @@ namespace Krearthur.GOP
             {
                 snapToGrid = !snapToGrid;
                 UpdateOffsetForObject(holdingObject);
-                PlaySoundRotate();
+                audio.PlaySoundRotate();
             }
 
             // Key Q => Free Hand
@@ -1359,7 +1356,10 @@ namespace Krearthur.GOP
             {
                 Tools.current = Tool.None;
                 currentRotationDelta = Vector3.zero;
-                if (holdingObject != null) holdingObject.transform.eulerAngles = startingEulerAngles;
+                if (holdingObject != null)
+                {
+                    holdingObject.transform.eulerAngles = startingEulerAngles;
+                }
                 objectFactory.objectEuler = Vector3.zero;
                 previousMode = mode;
                 mode = OperationMode.Line;
@@ -1375,7 +1375,10 @@ namespace Krearthur.GOP
                     fillRect = !fillRect;
                 }
                 currentRotationDelta = Vector3.zero;
-                if (holdingObject != null) holdingObject.transform.eulerAngles = startingEulerAngles;
+                if (holdingObject != null)
+                {
+                    holdingObject.transform.eulerAngles = startingEulerAngles;
+                }
                 objectFactory.objectEuler = Vector3.zero;
                 previousMode = mode;
                 mode = OperationMode.Rect;
@@ -1387,7 +1390,10 @@ namespace Krearthur.GOP
             {
                 Tools.current = Tool.None;
                 currentRotationDelta = Vector3.zero;
-                if (holdingObject != null) holdingObject.transform.eulerAngles = startingEulerAngles;
+                if (holdingObject != null)
+                {
+                    holdingObject.transform.eulerAngles = startingEulerAngles;
+                }
                 objectFactory.objectEuler = Vector3.zero;
                 previousMode = mode;
                 mode = OperationMode.Circle;
@@ -1428,7 +1434,7 @@ namespace Krearthur.GOP
                 hideCanvas = false;
                 UpdatePaintCanvasSize();
                 UpdateOffsetForObject(holdingObject);
-                PlaySoundRotate();
+                audio.PlaySoundRotate();
                 e.Use();
             }
 
@@ -1483,7 +1489,7 @@ namespace Krearthur.GOP
                 mode = previousMode != mode ? previousMode : OperationMode.Freehand;
             }
             holdingObject.AddComponent<Pop>();
-            PlaySoundDelete();
+            audio.PlaySoundDelete();
         }
 
         protected void SubmitScaleMode()
@@ -1491,7 +1497,7 @@ namespace Krearthur.GOP
             currentScale = holdingObject.transform.localScale;
             mode = previousMode != mode ? previousMode : OperationMode.Freehand;
             holdingObject.AddComponent<Pop>();
-            PlaySoundRotate();
+            audio.PlaySoundRotate();
         }
 
         protected void CancelDragging()
@@ -1512,7 +1518,6 @@ namespace Krearthur.GOP
                 }
                 else if (circleBrush != null)
                 {
-
                     CapsuleCollider cc = circleBrush.GetComponent<CapsuleCollider>();
                     cc.enabled = true;
 
@@ -1540,7 +1545,7 @@ namespace Krearthur.GOP
                     }
                     if (atleastOne)
                     {
-                        PlaySoundDelete();
+                        audio.PlaySoundDelete();
                     }
                 }
 
@@ -1549,7 +1554,6 @@ namespace Krearthur.GOP
             {
                 PaintObjectOnCursor(e);
             }
-
         }
 
         protected void HandleMouseDragLine(Vector3 start, Vector3 end)
@@ -1559,13 +1563,19 @@ namespace Krearthur.GOP
                 lastMassSelection = Selection.gameObjects;
 
                 Vector3 camAxisOffset = GetCanvasAxis() * 0.3f;
-                if (camAxisPolarityInverted) camAxisOffset *= -1;
-                if (canvasAxis == CanvasAxis.Z) camAxisOffset *= -1;
+                if (camAxisPolarityInverted)
+                {
+                    camAxisOffset *= -1;
+                }
+                if (canvasAxis == CanvasAxis.Z)
+                {
+                    camAxisOffset *= -1;
+                }
 
                 SelectObjectsInLine(start + camAxisOffset, end + camAxisOffset);
                 if (lastMassSelection != null && lastMassSelection.Length != Selection.gameObjects.Length)
                 {
-                    PlaySoundLineRectDelete();
+                    audio.PlaySoundLineRectDelete();
                 }
             }
             else
@@ -1579,7 +1589,7 @@ namespace Krearthur.GOP
                 lineFactory.Produce(start);
                 if (lastAddedObject != objectFactory.GetLatest())
                 {
-                    PlaySoundLineRectTool();
+                    audio.PlaySoundLineRectTool();
                 }
                 lastAddedObject = objectFactory.GetLatest();
             }
@@ -1596,12 +1606,15 @@ namespace Krearthur.GOP
                 SelectObjectsInRect(cursorRect, (float)result[1], (float)result[2]);
                 if (lastMassSelection != null && lastMassSelection.Length != Selection.gameObjects.Length)
                 {
-                    PlaySoundLineRectDelete();
+                    audio.PlaySoundLineRectDelete();
                 }
             }
             else
             {
-                if (alignWithStroke) objectFactory.objectEuler = currentRotationDelta;
+                if (alignWithStroke)
+                {
+                    objectFactory.objectEuler = currentRotationDelta;
+                }
                 rectFactory.padding = padding;
                 rectFactory.axis = canvasAxis;
                 rectFactory.startPos = start;
@@ -1613,7 +1626,7 @@ namespace Krearthur.GOP
                 rectFactory.Produce(start);
                 if (lastAddedObject != objectFactory.GetLatest())
                 {
-                    PlaySoundLineRectTool();
+                    audio.PlaySoundLineRectTool();
                 }
                 lastAddedObject = objectFactory.GetLatest();
             }
@@ -1651,7 +1664,7 @@ namespace Krearthur.GOP
                 SelectObjectsInRect(cursorRect, (float)result[1], (float)result[2]);
                 if (lastMassSelection != null && lastMassSelection.Length != Selection.gameObjects.Length)
                 {
-                    PlaySoundLineRectDelete();
+                    audio.PlaySoundLineRectDelete();
                 }
             }
             else
@@ -1671,7 +1684,7 @@ namespace Krearthur.GOP
 
                 if (lastAddedObject != objectFactory.GetLatest())
                 {
-                    PlaySoundLineRectTool();
+                    audio.PlaySoundLineRectTool();
                 }
                 lastAddedObject = objectFactory.GetLatest();
             }
@@ -1685,7 +1698,7 @@ namespace Krearthur.GOP
             {
                 if (Selection.gameObjects != null && Selection.gameObjects.Length > 0)
                 {
-                    PlaySoundDelete();
+                    audio.PlaySoundDelete();
                     history.Push(new PaintAction(Selection.gameObjects, PaintAction.ActionType.Removed));
                 }
                 foreach (GameObject go in Selection.gameObjects)
@@ -1717,7 +1730,7 @@ namespace Krearthur.GOP
 
                 history.Push(new PaintAction(objectFactory.GetActiveProducts(), PaintAction.ActionType.Added));
 
-                PlaySoundPaint();
+                audio.PlaySoundPaint();
                 // FireEvent
                 OnObjectMassPainted?.Invoke(objectFactory.GetActiveProducts().ToArray(), GetCanvasAxis(), SnapToGrid);
                 OnObjectMassPaintedLate?.Invoke(objectFactory.GetActiveProducts().ToArray(), GetCanvasAxis(), SnapToGrid);
@@ -1732,14 +1745,26 @@ namespace Krearthur.GOP
             if (!dynamicGrid)
             {
                 gridSize = Vector3.one;
-                if (canvasAxis == CanvasAxis.X) canvasPositionX = canvasPositionX.GridPos(gridSize.x);
-                if (canvasAxis == CanvasAxis.Y) canvasPositionY = canvasPositionY.GridPos(gridSize.y);
-                if (canvasAxis == CanvasAxis.Z) canvasPositionZ = canvasPositionZ.GridPos(gridSize.z);
+                if (canvasAxis == CanvasAxis.X)
+                {
+                    canvasPositionX = canvasPositionX.GridPos(gridSize.x);
+                }
+                if (canvasAxis == CanvasAxis.Y)
+                {
+                    canvasPositionY = canvasPositionY.GridPos(gridSize.y);
+                }
+                if (canvasAxis == CanvasAxis.Z)
+                {
+                    canvasPositionZ = canvasPositionZ.GridPos(gridSize.z);
+                }
                 UpdatePaintCanvasSize();
             }
-            else CalculateGrid(holdingObject);
+            else
+            {
+                CalculateGrid(holdingObject);
+            }
             UpdateOffsetForObject(holdingObject);
-            PlaySoundRotate();
+            audio.PlaySoundRotate();
 
         }
 
@@ -1748,9 +1773,18 @@ namespace Krearthur.GOP
             if (alt) // RotateObject
             {
                 Vector3 newRotationDelta = currentRotationDelta;
-                if (canvasAxis == CanvasAxis.X) newRotationDelta.x += rotationStep * (e.delta.y < 0 ? 1 : -1);
-                if (canvasAxis == CanvasAxis.Y) newRotationDelta.y += rotationStep * (e.delta.y < 0 ? 1 : -1);
-                if (canvasAxis == CanvasAxis.Z) newRotationDelta.z += rotationStep * (e.delta.y < 0 ? 1 : -1);
+                if (canvasAxis == CanvasAxis.X)
+                {
+                    newRotationDelta.x += rotationStep * (e.delta.y < 0 ? 1 : -1);
+                }
+                if (canvasAxis == CanvasAxis.Y)
+                {
+                    newRotationDelta.y += rotationStep * (e.delta.y < 0 ? 1 : -1);
+                }
+                if (canvasAxis == CanvasAxis.Z)
+                {
+                    newRotationDelta.z += rotationStep * (e.delta.y < 0 ? 1 : -1);
+                }
 
                 currentRotationDelta = newRotationDelta;
                 Transform rotationBody = holdingObject.transform.Find("Center");
@@ -1758,15 +1792,33 @@ namespace Krearthur.GOP
                 {
                     if (rotationBody != null)
                     {
-                        if (canvasAxis == CanvasAxis.X) rotationBody.Rotate(rotationStep * (e.delta.y < 0 ? 1 : -1), 0, 0, Space.World);
-                        if (canvasAxis == CanvasAxis.Y) rotationBody.Rotate(0, rotationStep * (e.delta.y < 0 ? 1 : -1), 0, Space.World);
-                        if (canvasAxis == CanvasAxis.Z) rotationBody.Rotate(0, 0, rotationStep * (e.delta.y < 0 ? 1 : -1), Space.World);
+                        if (canvasAxis == CanvasAxis.X)
+                        {
+                            rotationBody.Rotate(rotationStep * (e.delta.y < 0 ? 1 : -1), 0, 0, Space.World);
+                        }
+                        if (canvasAxis == CanvasAxis.Y)
+                        {
+                            rotationBody.Rotate(0, rotationStep * (e.delta.y < 0 ? 1 : -1), 0, Space.World);
+                        }
+                        if (canvasAxis == CanvasAxis.Z)
+                        {
+                            rotationBody.Rotate(0, 0, rotationStep * (e.delta.y < 0 ? 1 : -1), Space.World);
+                        }
                     }
                     else
                     {
-                        if (canvasAxis == CanvasAxis.X) holdingObject.transform.Rotate(rotationStep * (e.delta.y < 0 ? 1 : -1), 0, 0, Space.World);
-                        if (canvasAxis == CanvasAxis.Y) holdingObject.transform.Rotate(0, rotationStep * (e.delta.y < 0 ? 1 : -1), 0, Space.World);
-                        if (canvasAxis == CanvasAxis.Z) holdingObject.transform.Rotate(0, 0, rotationStep * (e.delta.y < 0 ? 1 : -1), Space.World);
+                        if (canvasAxis == CanvasAxis.X)
+                        {
+                            holdingObject.transform.Rotate(rotationStep * (e.delta.y < 0 ? 1 : -1), 0, 0, Space.World);
+                        }
+                        if (canvasAxis == CanvasAxis.Y)
+                        {
+                            holdingObject.transform.Rotate(0, rotationStep * (e.delta.y < 0 ? 1 : -1), 0, Space.World);
+                        }
+                        if (canvasAxis == CanvasAxis.Z)
+                        {
+                            holdingObject.transform.Rotate(0, 0, rotationStep * (e.delta.y < 0 ? 1 : -1), Space.World);
+                        }
                     }
                 }
                 else
@@ -1774,7 +1826,7 @@ namespace Krearthur.GOP
                     holdingObject.transform.Rotate(0, rotationStep * (e.delta.y < 0 ? 1 : -1), 0, Space.Self);
                 }
 
-                PlaySoundRotate();
+                audio.PlaySoundRotate();
                 if (mode == OperationMode.Line || mode == OperationMode.Rect || mode == OperationMode.Circle)
                 {
                     objectFactory.UpdateAllProductsRotation(holdingObject.transform.eulerAngles);
@@ -1790,7 +1842,10 @@ namespace Krearthur.GOP
 
                 circleBrush.transform.localScale = new Vector3(brushRadius, 1f, brushRadius);
 
-                if (before != brushRadius) PlaySoundRotate();
+                if (before != brushRadius)
+                {
+                    audio.PlaySoundRotate();
+                }
                 e.Use();
             }
             else if (isDragging)
@@ -1798,14 +1853,18 @@ namespace Krearthur.GOP
                 float gridSizeAxis = canvasAxis == CanvasAxis.X ? gridSize.x
                                      : (canvasAxis == CanvasAxis.Y) ? gridSize.y : gridSize.z;
                 float paddingDelta = SnapToGrid ? gridSizeAxis : minPadding;
-                float paddingBefore = 0;
-                float paddingAfter = 0;
 
-                paddingBefore = padding;
+                float paddingBefore = padding;
                 padding += (e.delta.y > 0 ? paddingDelta : -paddingDelta);
-                if (padding < minPadding) padding = SnapToGrid ? 1 : minPadding;
-                if (padding > maxPadding) padding = maxPadding;
-                paddingAfter = padding;
+                if (padding < minPadding)
+                {
+                    padding = SnapToGrid ? 1 : minPadding;
+                }
+                if (padding > maxPadding)
+                {
+                    padding = maxPadding;
+                }
+                float paddingAfter = padding;
 
                 if (mode == OperationMode.Line)
                 {
@@ -1824,7 +1883,10 @@ namespace Krearthur.GOP
                     circleFactory.Produce();
                 }
 
-                if (paddingBefore != paddingAfter) PlaySoundRotate();
+                if (paddingBefore != paddingAfter)
+                {
+                    audio.PlaySoundRotate();
+                }
                 e.Use();
             }
 
@@ -1837,67 +1899,64 @@ namespace Krearthur.GOP
             {
                 float degreesBefore = circleFactory.degrees;
                 circleFactory.degrees += e.delta.y < 0 ? 10 : -10;
-                if (circleFactory.degrees >= 360) circleFactory.degrees = 360;
-                if (circleFactory.degrees <= 0) circleFactory.degrees = 0;
+                if (circleFactory.degrees >= 360)
+                {
+                    circleFactory.degrees = 360;
+                }
+                if (circleFactory.degrees <= 0)
+                {
+                    circleFactory.degrees = 0;
+                }
                 float degreesAfter = circleFactory.degrees;
-                if (degreesBefore != degreesAfter) PlaySoundRotate();
-                if (isDragging) circleFactory.Produce();
+                if (degreesBefore != degreesAfter)
+                {
+                    audio.PlaySoundRotate();
+                }
+                if (isDragging)
+                {
+                    circleFactory.Produce();
+                }
 
             }
             else
             {// set canvas position
-
                 if (canvasAxis == CanvasAxis.X)
                 {
-                    if (e.delta.y < 0 && canvasPositionX < paintCanvasSize - 1)
-                    {
-                        PlaySoundMovePlaneUp();
-                        canvasPositionX += gridSize.x;
-                        if (canvasPositionX >= paintCanvasSize / 2) canvasPositionX = paintCanvasSize / 2 - 1;
-                    }
-                    else if (e.delta.y > 0 && canvasPositionX > -paintCanvasSize / 2)
-                    {
-                        PlaySoundMovePlaneDown();
-                        canvasPositionX -= gridSize.x;
-                        if (canvasPositionX < -paintCanvasSize / 2) canvasPositionX = -paintCanvasSize / 2;
-                    }
+                    SetCanvasPosition(ref canvasPositionX, gridSize.x);
                 }
                 else if (canvasAxis == CanvasAxis.Y)
                 {
-                    if (e.delta.y < 0 && canvasPositionY < paintCanvasSize - 1)
-                    {
-                        PlaySoundMovePlaneUp();
-                        canvasPositionY += gridSize.y;
-                        if (canvasPositionY >= paintCanvasSize / 2) canvasPositionY = paintCanvasSize / 2 - 1;
-                    }
-                    else if (e.delta.y > 0 && canvasPositionY > -paintCanvasSize / 2)
-                    {
-                        if (!(preventCanvasBelow0 && canvasPositionY <= 0))
-                        {
-                            PlaySoundMovePlaneDown();
-                            canvasPositionY -= gridSize.y;
-                            if (canvasPositionY < -paintCanvasSize / 2) canvasPositionY = -paintCanvasSize / 2;
-                        }
-                    }
+                    SetCanvasPosition(ref canvasPositionY, gridSize.y);
                 }
                 else if (canvasAxis == CanvasAxis.Z)
                 {
-                    if (e.delta.y < 0 && canvasPositionZ < paintCanvasSize - 1)
-                    {
-                        PlaySoundMovePlaneUp();
-                        canvasPositionZ += gridSize.z;
-                        if (canvasPositionZ >= paintCanvasSize / 2) canvasPositionZ = paintCanvasSize / 2 - 1;
-                    }
-                    else if (e.delta.y > 0 && canvasPositionZ > -paintCanvasSize / 2)
-                    {
-                        PlaySoundMovePlaneDown();
-                        canvasPositionZ -= gridSize.z;
-                        if (canvasPositionZ < -paintCanvasSize / 2) canvasPositionZ = -paintCanvasSize / 2;
-                    }
+                    SetCanvasPosition(ref canvasPositionZ, gridSize.z);
                 }
                 UpdatePaintCanvasSize();
             }
             e.Use();
+
+            void SetCanvasPosition(ref float canvasPosition, float gridSize)
+            {
+                if (e.delta.y < 0 && canvasPosition < paintCanvasSize - 1)
+                {
+                    audio.PlaySoundMovePlaneUp(canvasAxis);
+                    canvasPosition += gridSize;
+                    if (canvasPosition >= paintCanvasSize / 2)
+                    {
+                        canvasPosition = paintCanvasSize / 2 - 1;
+                    }
+                }
+                else if (e.delta.y > 0 && canvasPosition > -paintCanvasSize / 2)
+                {
+                    audio.PlaySoundMovePlaneDown(canvasAxis);
+                    canvasPosition -= gridSize;
+                    if (canvasPosition < -paintCanvasSize / 2)
+                    {
+                        canvasPosition = -paintCanvasSize / 2;
+                    }
+                }
+            }
         }
 
         protected void HandleSwitchPrefabs(Event e)
@@ -2041,7 +2100,7 @@ namespace Krearthur.GOP
                 if (changed)
                 {
                     holdingObject.transform.localScale = currentScale;
-                    PlaySoundRotate();
+                    audio.PlaySoundRotate();
                     holdingObject.AddComponent<Pop>();
                     UpdateOffsetForObject(holdingObject);
                 }
@@ -2051,7 +2110,10 @@ namespace Krearthur.GOP
 
         protected GameObject GetObjectOrPrefabInstance(GameObject go)
         {
-            if (go == null) return go;
+            if (go == null)
+            {
+                return go;
+            }
             return go.IsPrefab() ? PrefabUtility.GetNearestPrefabInstanceRoot(go) : go;
         }
 
@@ -2155,7 +2217,10 @@ namespace Krearthur.GOP
                 {
                     DestroyImmediate(parkedPicked);
                 }
-                if (resetRotation) currentRotationDelta = Vector3.zero;
+                if (resetRotation)
+                {
+                    currentRotationDelta = Vector3.zero;
+                }
                 selectedPrefab = paintObjects[prefabId];
                 objectFactory.objectToCreate = paintObjects[prefabId];
 
@@ -2180,7 +2245,11 @@ namespace Krearthur.GOP
         }
 
         // SetPosition of object
-        public void SetObjectPosition(GameObject go, Vector3 pos) { SetObjectPosition(go, pos, Vector3.zero); }
+        public void SetObjectPosition(GameObject go, Vector3 pos)
+        {
+            SetObjectPosition(go, pos, Vector3.zero);
+        }
+
         public void SetObjectPosition(GameObject go, Vector3 pos, Vector3 normal, bool skipAlignStroke = false)
         {
             Vector3 gridPos = GridPos(pos);
@@ -2188,7 +2257,9 @@ namespace Krearthur.GOP
             {
                 circleBrush.SetActive(mode == OperationMode.Freehand);
                 if (alt)
+                {
                     circleBrush.transform.position = pos;
+                }
                 circleBrush.transform.localScale = new Vector3(brushRadius, 1f, brushRadius);
             }
 
@@ -2197,7 +2268,6 @@ namespace Krearthur.GOP
             //{
             //    canvasPositionY = gridPos.y;
             //    canvasPositionZ = gridPos.z;
-
             //}
             //else if (canvasAxis == CanvasAxis.Y)
             //{
@@ -2231,8 +2301,14 @@ namespace Krearthur.GOP
                 if (normal == Vector3.zero)
                 {
                     Vector3 raycastDir = GetCanvasAxis();
-                    if (camAxisPolarityInverted) raycastDir *= -1;
-                    if (canvasAxis == CanvasAxis.Z) raycastDir *= -1;
+                    if (camAxisPolarityInverted)
+                    {
+                        raycastDir *= -1;
+                    }
+                    if (canvasAxis == CanvasAxis.Z)
+                    {
+                        raycastDir *= -1;
+                    }
 
                     //normal = RaycastSurfaceNormal(go, pos + raycastDir * 5, -raycastDir);
                     int layerMask = 0;
@@ -2248,17 +2324,13 @@ namespace Krearthur.GOP
                 Vector3 orientedOffset = Vector3.zero;
                 // re-apply offset
                 //if (canvasAxis == CanvasAxis.X)
-                //{
                 //    orientedOffset = alignFactor * go.transform.up * placeOffset.x;
-                //}
                 if (canvasAxis == CanvasAxis.Y)
                 {
                     orientedOffset = alignFactor * go.transform.up * placeOffset.y;
                 }
                 //else if (canvasAxis == CanvasAxis.Z)
-                //{
                 //    orientedOffset = -alignFactor * go.transform.up * placeOffset.y;
-                //}
 
                 go.transform.position += orientedOffset;
             }
@@ -2333,7 +2405,10 @@ namespace Krearthur.GOP
         // SetOffset, CalculateOffset, Calculate Offset
         public Vector3 UpdateOffsetForObject(GameObject go)
         {
-            if (go == null) return Vector3.zero;
+            if (go == null)
+            {
+                return Vector3.zero;
+            }
 
             placeOffset = Vector3.zero;
 
@@ -2366,7 +2441,6 @@ namespace Krearthur.GOP
                     {
                         bounds = renderer.bounds;
                     }
-
                 }
 
                 placeOffset = go.transform.position - bounds.center;
@@ -2380,8 +2454,8 @@ namespace Krearthur.GOP
                         {
                             placeOffset.x += bounds.extents.x;
 
-                            if (camAxisPolarityInverted)
-                            { // looking from left
+                            if (camAxisPolarityInverted) // looking from left
+                            {
                                 placeOffset.x -= bounds.extents.x * 2;
                             }
                             break;
@@ -2389,8 +2463,8 @@ namespace Krearthur.GOP
                     case CanvasAxis.Y:
                         {
                             placeOffset.y += bounds.extents.y;
-                            if (camAxisPolarityInverted)
-                            { // looking from below
+                            if (camAxisPolarityInverted) // looking from below
+                            {
                                 placeOffset.y -= bounds.extents.y * 2;
                             }
                             break;
@@ -2398,8 +2472,8 @@ namespace Krearthur.GOP
                     case CanvasAxis.Z:
                         {
                             placeOffset.z -= bounds.extents.z;
-                            if (camAxisPolarityInverted)
-                            { // looking behind
+                            if (camAxisPolarityInverted) // looking behind
+                            {
                                 placeOffset.z += bounds.extents.z * 2;
                             }
                             break;
@@ -2409,12 +2483,24 @@ namespace Krearthur.GOP
 
                 if (snapToGrid)
                 {
-                    if (canvasAxis != CanvasAxis.X) placeOffset.x -= gridSize.x * 0.5f;
-                    if (canvasAxis != CanvasAxis.Y) placeOffset.y -= gridSize.y * 0.5f;
-                    if (canvasAxis != CanvasAxis.Z) placeOffset.z -= gridSize.z * 0.5f;
+                    if (canvasAxis != CanvasAxis.X)
+                    {
+                        placeOffset.x -= gridSize.x * 0.5f;
+                    }
+                    if (canvasAxis != CanvasAxis.Y)
+                    {
+                        placeOffset.y -= gridSize.y * 0.5f;
+                    }
+                    if (canvasAxis != CanvasAxis.Z)
+                    {
+                        placeOffset.z -= gridSize.z * 0.5f;
+                    }
                 }
 
-                if (colli != null) colli.enabled = false;
+                if (colli != null)
+                {
+                    colli.enabled = false;
+                }
             }
 
             return placeOffset;
@@ -2442,22 +2528,40 @@ namespace Krearthur.GOP
         public GameObject PickObjectWithoutCollider(Vector2 screenPos)
         {
             GameObject go = HandleUtility.PickGameObject(screenPos, true, IgnoredObjectsToPick);
-            if (go == null) return null;
+            if (go == null)
+            {
+                return null;
+            }
             // Dont pick the terrain!
-            if (go != null && go.TryGetComponent(out Terrain terry)) return null;
-            if (go != null && go.layer == LayerMask.NameToLayer(canvasLayer)) return null;
+            if (go != null && go.TryGetComponent(out Terrain terry))
+            {
+                return null;
+            }
+            if (go != null && go.layer == LayerMask.NameToLayer(canvasLayer))
+            {
+                return null;
+            }
 
             if (canvasAxis == CanvasAxis.X)
             {
-                if (go.transform.position.x < paintCanvas.transform.position.x) return null;
+                if (go.transform.position.x < paintCanvas.transform.position.x)
+                {
+                    return null;
+                }
             }
             if (canvasAxis == CanvasAxis.Y)
             {
-                if (go.transform.position.y < paintCanvas.transform.position.y) return null;
+                if (go.transform.position.y < paintCanvas.transform.position.y)
+                {
+                    return null;
+                }
             }
             if (canvasAxis == CanvasAxis.Z)
             {
-                if (go.transform.position.z < paintCanvas.transform.position.z) return null;
+                if (go.transform.position.z < paintCanvas.transform.position.z)
+                {
+                    return null;
+                }
             }
             return go;
         }
@@ -2466,7 +2570,10 @@ namespace Krearthur.GOP
         protected void DestroyObjectOnCursor(Event e)
         {
             GameObject target = RaycastFirst(e);
-            if (target != null && target.layer == LayerMask.NameToLayer(canvasLayer)) target = null;
+            if (target != null && target.layer == LayerMask.NameToLayer(canvasLayer))
+            {
+                target = null;
+            }
 
             if (target == null)
             {
@@ -2486,7 +2593,7 @@ namespace Krearthur.GOP
                     target = null;
                 }
 
-                PlaySoundDelete();
+                audio.PlaySoundDelete();
                 EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
                 e.Use();
             }
@@ -2578,9 +2685,7 @@ namespace Krearthur.GOP
 
             Collider[] collis = null;
             if (go.TryGetComponent(out Collider goColli))
-            {
                 collis = Physics.OverlapBox(goColli.bounds.center, goColli.bounds.extents * 0.9f, go.transform.rotation, notPlaneNorEditLayer);
-            }
 
             allColliding = new List<GameObject>();
 
@@ -2624,9 +2729,12 @@ namespace Krearthur.GOP
             {
                 holdingObject.layer = originalLayer;
                 holdingObject.name = holdingObject.name.Remove(0, holdingPrefix.Length);
-                if (goColli != null) goColli.enabled = true;
+                if (goColli != null)
+                {
+                    goColli.enabled = true;
+                }
 
-                PlaySoundPaint();
+                audio.PlaySoundPaint();
 
 
                 paintCollection.Add(holdingObject);
@@ -2732,7 +2840,7 @@ namespace Krearthur.GOP
                 //holdingObject.name = holdingPrefix + holdingObject.name;
                 holdingObject.layer = LayerMask.NameToLayer(editLayer);
                 CalculateGrid(holdingObject);
-                PlaySoundPick();
+                audio.PlaySoundPick();
             }
 
         }
@@ -2759,62 +2867,6 @@ namespace Krearthur.GOP
                     gridSize = go.GetComponentInChildren<MeshFilter>().sharedMesh.bounds.size;
                 }
             }
-
-        }
-
-        protected void PlaySoundMovePlaneUp()
-        {
-            float pitch = ((float)(canvasPositionY + 1) / paintCanvasSize + 0.5f) * 0.6f;
-            if (canvasAxis == CanvasAxis.X) pitch = ((float)(canvasPositionX + 1) / paintCanvasSize + 0.5f) * 0.6f;
-            if (canvasAxis == CanvasAxis.Z) pitch = ((float)(canvasPositionZ + 1) / paintCanvasSize + 0.5f) * 0.6f;
-
-            PlaySound(placeSound, pitch);
-        }
-
-        protected void PlaySoundMovePlaneDown()
-        {
-            float pitch = ((float)(canvasPositionY - 1) / paintCanvasSize + 0.5f) * 0.6f;
-            if (canvasAxis == CanvasAxis.X) pitch = ((float)(canvasPositionX - 1) / paintCanvasSize + 0.5f) * 0.6f;
-            if (canvasAxis == CanvasAxis.Z) pitch = ((float)(canvasPositionZ - 1) / paintCanvasSize + 0.5f) * 0.6f;
-
-            PlaySound(placeSound, pitch);
-        }
-
-        protected void PlaySoundRotate()
-        {
-            PlaySound(placeSound, 3f);
-        }
-
-        protected void PlaySoundPaint()
-        {
-            PlaySound(placeSound, 1);
-        }
-
-        protected void PlaySoundDelete()
-        {
-            PlaySound(placeSound, 0.75f);
-        }
-
-        protected void PlaySoundPick()
-        {
-            PlaySound(placeSound, 1.5f);
-        }
-
-        protected void PlaySoundLineRectTool()
-        {
-            PlaySound(placeSound, 1.5f);
-        }
-
-        protected void PlaySoundLineRectDelete()
-        {
-            PlaySound(placeSound, 3f);
-        }
-
-        protected void PlaySound(AudioClip clip, float pitch)
-        {
-            if (!enableSounds) return;
-            audio.pitch = pitch;
-            audio.PlayOneShot(clip);
         }
 
         protected Transform GetObjectGroupFor(GameObject go)
@@ -2880,9 +2932,18 @@ namespace Krearthur.GOP
                || paintCanvas.transform.position.y % gridSize.z != 0)
             {
                 gridSize = Vector3.one;
-                if (canvasAxis == CanvasAxis.X) canvasPositionX = canvasPositionX.GridPos(gridSize.x);
-                if (canvasAxis == CanvasAxis.Y) canvasPositionY = canvasPositionY.GridPos(gridSize.y);
-                if (canvasAxis == CanvasAxis.Z) canvasPositionZ = canvasPositionZ.GridPos(gridSize.z);
+                if (canvasAxis == CanvasAxis.X)
+                {
+                    canvasPositionX = canvasPositionX.GridPos(gridSize.x);
+                }
+                if (canvasAxis == CanvasAxis.Y)
+                {
+                    canvasPositionY = canvasPositionY.GridPos(gridSize.y);
+                }
+                if (canvasAxis == CanvasAxis.Z)
+                {
+                    canvasPositionZ = canvasPositionZ.GridPos(gridSize.z);
+                }
                 UpdatePaintCanvasSize();
             }
             SetObjectPosition(newInstance, pos);
@@ -2924,8 +2985,8 @@ namespace Krearthur.GOP
             // If F is pressed to frame an object, the mouse position instantly jumps to a crazy negative value for some frames, which caused gop to thing the cursor is out of scene view wich results in destroying the object
             // this calculation fixes it
             //if (Vector2.SqrMagnitude(lastMousePos - mousePos) > 62500) return true;
-            return (pos.x >= 0 && pos.x <= scene.position.width) &&
-                (pos.y >= 0 && pos.y <= scene.position.height);
+            return pos.x >= 0 && pos.x <= scene.position.width &&
+                pos.y >= 0 && pos.y <= scene.position.height;
         }
 
         protected void SetCustomCursor(Event e)
@@ -2956,39 +3017,70 @@ namespace Krearthur.GOP
                     holdingObject.SetActive(false);
                 }
 
-                if (mode == OperationMode.Freehand) Cursor.SetCursor(cursorDelete, new Vector2(0, 31), CursorMode.Auto);
-                else if (mode == OperationMode.Line) Cursor.SetCursor(cursorLineDelete, new Vector2(0, 31), CursorMode.Auto);
-                else if (mode == OperationMode.Rect) Cursor.SetCursor(cursorRectDelete, new Vector2(0, 31), CursorMode.Auto);
-                else if (mode == OperationMode.Circle) Cursor.SetCursor(cursorCircleDelete, new Vector2(0, 31), CursorMode.Auto);
+                if (mode == OperationMode.Freehand)
+                {
+                    Cursor.SetCursor(resources.cursorDelete, new Vector2(0, 31), CursorMode.Auto);
+                }
+                else if (mode == OperationMode.Line)
+                {
+                    Cursor.SetCursor(resources.cursorLineDelete, new Vector2(0, 31), CursorMode.Auto);
+                }
+                else if (mode == OperationMode.Rect)
+                {
+                    Cursor.SetCursor(resources.cursorRectDelete, new Vector2(0, 31), CursorMode.Auto);
+                }
+                else if (mode == OperationMode.Circle)
+                {
+                    Cursor.SetCursor(resources.cursorCircleDelete, new Vector2(0, 31), CursorMode.Auto);
+                }
             }
             else if (!shift) // Set Paint Cursor
             {
                 // Hide holding object
                 if (rightDown || (isDragging && mode != OperationMode.Freehand))
                 {
-                    if (holdingObject != null) holdingObject.SetActive(false);
+                    if (holdingObject != null)
+                    {
+                        holdingObject.SetActive(false);
+                    }
                 }
                 else if (holdingObject != null)
                 {
-                    if (holdingObject != null) holdingObject?.SetActive(true);
+                    if (holdingObject != null)
+                    {
+                        holdingObject?.SetActive(true);
+                    }
                 }
 
-                if (rightDown) Cursor.SetCursor(cursorPick, new Vector2(0, 31), CursorMode.Auto);
-                else if (mode == OperationMode.Freehand) Cursor.SetCursor(cursor, new Vector2(0, 31), CursorMode.Auto);
-                else if (mode == OperationMode.Line) Cursor.SetCursor(cursorLine, new Vector2(0, 31), CursorMode.Auto);
+                if (rightDown)
+                {
+                    Cursor.SetCursor(resources.cursorPick, new Vector2(0, 31), CursorMode.Auto);
+                }
+                else if (mode == OperationMode.Freehand)
+                {
+                    Cursor.SetCursor(resources.cursor, new Vector2(0, 31), CursorMode.Auto);
+                }
+                else if (mode == OperationMode.Line)
+                {
+                    Cursor.SetCursor(resources.cursorLine, new Vector2(0, 31), CursorMode.Auto);
+                }
                 else if (mode == OperationMode.Rect)
                 {
                     if (fillRect)
-                        Cursor.SetCursor(cursorRectFill, new Vector2(0, 31), CursorMode.Auto);
+                    {
+                        Cursor.SetCursor(resources.cursorRectFill, new Vector2(0, 31), CursorMode.Auto);
+                    }
                     else
-                        Cursor.SetCursor(cursorRect, new Vector2(0, 31), CursorMode.Auto);
+                    {
+                        Cursor.SetCursor(resources.cursorRect, new Vector2(0, 31), CursorMode.Auto);
+                    }
                 }
                 else if (mode == OperationMode.Circle)
                 {
                     //if (fillCircle)
                     //    Cursor.SetCursor(cursorCircleFill, new Vector2(0, 31), CursorMode.Auto);
                     //else
-                    Cursor.SetCursor(cursorCircle, new Vector2(0, 31), CursorMode.Auto);
+                    Cursor.SetCursor(resources.cursorCircle, new Vector2(0, 31), CursorMode.Auto);
                 }
                 else if (mode == OperationMode.Scale)
                 {
@@ -3010,10 +3102,13 @@ namespace Krearthur.GOP
         {
             return scene.camera.ScreenPointToRay(GetMousePos(e));
         }
+
         protected Ray CreateRay(Vector2 cursorPos)
         {
             if (scene != null && scene.camera != null)
+            {
                 return scene.camera.ScreenPointToRay(cursorPos);
+            }
             return new Ray();
         }
 
@@ -3130,7 +3225,10 @@ namespace Krearthur.GOP
 
         public Vector3 GetCursorRayPosCanvas(Vector2 cursorPos)
         {
-            if (paintCanvas == null) return Vector3.zero;
+            if (paintCanvas == null)
+            {
+                return Vector3.zero;
+            }
             // Only raycast against the plane
             int planeLayerMask = (1 << paintCanvas.layer);
             RaycastHit hit;
@@ -3173,9 +3271,7 @@ namespace Krearthur.GOP
             List<GameObject> list = new List<GameObject>();
             Ray ray = CreateRay(e);
             foreach (RaycastHit hit in Physics.RaycastAll(ray, MAX_RAY_DIST))
-            {
                 list.Add(hit.collider.gameObject);
-            }
             return list;
         }
 

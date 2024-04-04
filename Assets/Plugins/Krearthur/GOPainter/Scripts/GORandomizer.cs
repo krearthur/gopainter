@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using Krearthur.Utils;
 using UnityEditor;
-using Krearthur.Utils;
+using UnityEngine;
 
 namespace Krearthur.GOP
 {
@@ -41,7 +41,7 @@ namespace Krearthur.GOP
         public bool randomizeChildren = true;
 
         MaterialPropertyBlock propBlock;
-        private void Start(){}
+        private void Start() { }
 
         private void Awake()
         {
@@ -96,7 +96,7 @@ namespace Krearthur.GOP
         void RandomizeMass(GameObject[] gos, Vector3 axis, bool snapToGrid)
         {
             if (!enabled) return;
-            foreach(GameObject go in gos)
+            foreach (GameObject go in gos)
             {
                 RandomizeTransform(go, axis, snapToGrid);
             }
@@ -105,14 +105,14 @@ namespace Krearthur.GOP
         void RandomizeTransform(GameObject go, Vector3 axis, bool snapToGrid)
         {
             if (!enabled) return;
-            
+
             if (randomPosition)
             {
                 Vector3 randomPos = new Vector3(
                     Mathf.Lerp(minPositionDelta.x, maxPositionDelta.x, Random.value),
                     Mathf.Lerp(minPositionDelta.y, maxPositionDelta.y, Random.value),
                     Mathf.Lerp(minPositionDelta.z, maxPositionDelta.z, Random.value));
-                
+
                 if (!individualAxisPos)
                 {
                     randomPos = Vector3.Lerp(minPositionDelta, maxPositionDelta, Random.value);
@@ -200,7 +200,7 @@ namespace Krearthur.GOP
                     go.transform.position -= delta;
                 }
             }
-            
+
             if (brightnessVariation)
             {
                 DoRandomBrightness(go);
@@ -243,7 +243,10 @@ namespace Krearthur.GOP
         void RandomColor(Renderer renderer)
         {
             if (!enabled) return;
-            if (propBlock == null) propBlock = new MaterialPropertyBlock();
+            if (propBlock == null)
+            {
+                propBlock = new MaterialPropertyBlock();
+            }
 
             renderer.GetPropertyBlock(propBlock);
             float alphaBefore = renderer.sharedMaterial.color.a;
@@ -253,7 +256,7 @@ namespace Krearthur.GOP
             {
                 renderer.gameObject.AddComponent<Marker>().typeCode = MarkerCode.RandomColor;
             }
-            
+
             if (dontChangeAlpha)
             {
                 color.a = alphaBefore;
