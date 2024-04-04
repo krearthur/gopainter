@@ -4,7 +4,7 @@ namespace Krearthur.GOP
 {
     public class PaintCanvas : MonoBehaviour
     {
-        void Start(){}
+        void Start() { }
     }
 
 }

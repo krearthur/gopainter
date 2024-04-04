@@ -18,18 +18,26 @@ public class GOPAudio
         this.resources = resources;
 
         if (painter.TryGetComponent<AudioSource>(out var audio))
+        {
             this.audio = audio;
+        }
         else
+        {
             this.audio = painter.gameObject.AddComponent<AudioSource>();
+        }
     }
 
     public void PlaySoundMovePlaneUp(CanvasAxis canvasAxis)
     {
         float pitch = ((painter.CanvasPositionY + 1) / painter.paintCanvasSize + .5f) * .6f;
         if (canvasAxis == CanvasAxis.X)
+        {
             pitch = ((painter.CanvasPositionX + 1) / painter.paintCanvasSize + .5f) * .6f;
+        }
         else if (canvasAxis == CanvasAxis.Z)
+        {
             pitch = ((painter.CanvasPositionZ + 1) / painter.paintCanvasSize + .5f) * .6f;
+        }
 
         PlaySound(resources.placeSound, pitch);
     }
@@ -38,9 +46,13 @@ public class GOPAudio
     {
         float pitch = ((painter.CanvasPositionY - 1) / painter.paintCanvasSize + .5f) * .6f;
         if (canvasAxis == CanvasAxis.X)
+        {
             pitch = ((painter.CanvasPositionX - 1) / painter.paintCanvasSize + .5f) * .6f;
+        }
         else if (canvasAxis == CanvasAxis.Z)
+        {
             pitch = ((painter.CanvasPositionZ - 1) / painter.paintCanvasSize + .5f) * .6f;
+        }
 
         PlaySound(resources.placeSound, pitch);
     }

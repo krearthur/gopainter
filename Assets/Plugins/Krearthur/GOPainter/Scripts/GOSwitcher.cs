@@ -1,6 +1,6 @@
 ﻿#if UNITY_EDITOR
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace Krearthur.GOP
 {
@@ -10,7 +10,7 @@ namespace Krearthur.GOP
     [ExecuteInEditMode]
     public class GOSwitcher : MonoBehaviour, GOComponent
     {
-        protected GOPainter goPainter;   
+        protected GOPainter goPainter;
         protected ObjectFactory factory;
 
         [Tooltip("Switches objects after painting to one of these object ids, referring to the ones in GOPainter 'Paint Objects' list.")]
@@ -24,7 +24,7 @@ namespace Krearthur.GOP
         }
         public Mode mode = Mode.Randomly;
 
-        private void Start(){}
+        private void Start() { }
 
         public void Register()
         {
@@ -61,22 +61,19 @@ namespace Krearthur.GOP
             }
 
             factory.OnObjectProduced -= SwitchProduced;
-            
+
             SceneView.duringSceneGui -= OnScene;
         }
 
         void SwitchPrefab(GameObject go, Vector3 axis, bool snapToGrid)
         {
             if (!enabled) return;
-            if (this != null && !enabled || goPainter.mode != GOPainter.OperationMode.Freehand)
-            {
-                return;
-            }
+            if (this != null && !enabled || goPainter.mode != GOPainter.OperationMode.Freehand) return;
 
             int newId = CalculateNextIndex();
 
             goPainter.SwitchPrefab(newId, false);
-            
+
         }
 
         protected int CalculateNextIndex()

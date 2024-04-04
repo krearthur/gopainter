@@ -24,11 +24,16 @@ namespace Krearthur.GOP
             {
                 length = filter.sharedMesh.bounds.extents.magnitude;
             }
-            
 
             decay = 1 / length * 5;
-            if (decay > 10) decay = 10;
-            if (decay < 5) decay = 5;
+            if (decay > 10)
+            {
+                decay = 10;
+            }
+            if (decay < 5)
+            {
+                decay = 5;
+            }
         }
 
         // Update is called once per frame
@@ -37,7 +42,7 @@ namespace Krearthur.GOP
             time += Time.deltaTime;
 
             float t = time;
-        
+
             Vector3 startVal = Vector3.one * 0.1f;
             Vector3 endVal = targetScale;
 
@@ -55,6 +60,5 @@ namespace Krearthur.GOP
 
         }
     }
-
 }
 #endif

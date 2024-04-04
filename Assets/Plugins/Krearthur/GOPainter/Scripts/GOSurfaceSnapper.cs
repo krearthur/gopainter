@@ -1,6 +1,6 @@
 ﻿#if UNITY_EDITOR
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace Krearthur.GOP
 {
@@ -17,7 +17,7 @@ namespace Krearthur.GOP
         [Tooltip("Goes x meters above the painted object, then casts down")]
         public float maxHeightToCastDownFrom = 30;
 
-        private void Start(){}
+        private void Start() { }
 
         public void Register()
         {
@@ -25,10 +25,10 @@ namespace Krearthur.GOP
             {
                 goPainter = GetComponent<GOPainter>();
             }
-            
+
             goPainter.OnObjectMassPaintedLate += CastObjectsDown;
             goPainter.OnObjectPainted += CastObjectDownGOP;
-            
+
 
             if (factory == null)
             {
@@ -46,10 +46,10 @@ namespace Krearthur.GOP
             {
                 goPainter = GetComponent<GOPainter>();
             }
-            
+
             goPainter.OnObjectMassPaintedLate -= CastObjectsDown;
             goPainter.OnObjectPainted -= CastObjectDownGOP;
-            
+
             if (factory == null)
             {
                 factory = GetComponent<ObjectFactory>();
@@ -75,10 +75,7 @@ namespace Krearthur.GOP
                 goPainter = GetComponent<GOPainter>();
             }
 
-            if (this != null && !enabled || goPainter.snapToGrid)
-            {
-                return;
-            }
+            if (this != null && !enabled || goPainter.snapToGrid) return;
             //print("yo, snap down!");
 
             int layerMask = (1 << LayerMask.NameToLayer(goPainter.canvasLayer));
@@ -90,8 +87,14 @@ namespace Krearthur.GOP
             RaycastHit[] hits = null;
             Vector3 direction = goPainter.GetCanvasAxis();
 
-            if (goPainter.GetSceneCamAxisPolarity() > 0) direction *= -1;
-            if (goPainter.GetCanvasAxis() == Vector3.forward) direction *= -1;
+            if (goPainter.GetSceneCamAxisPolarity() > 0)
+            {
+                direction *= -1;
+            }
+            if (goPainter.GetCanvasAxis() == Vector3.forward)
+            {
+                direction *= -1;
+            }
 
             hits = Physics.RaycastAll(go.transform.position + direction * maxHeightToCastDownFrom, -direction, maxHeightToCastDownFrom * 10, layerMask);
             RaycastHit nearestHit = new RaycastHit();
@@ -126,10 +129,7 @@ namespace Krearthur.GOP
             {
                 goPainter = GetComponent<GOPainter>();
             }
-            if (this != null && !enabled || snapToGrid)
-            {
-                return;
-            }
+            if (this != null && !enabled || snapToGrid) return;
             int layerMask = ~(1 << LayerMask.NameToLayer(goPainter.editLayer));
 
             foreach (GameObject go in gos)
@@ -137,8 +137,14 @@ namespace Krearthur.GOP
                 RaycastHit[] hits = null;
                 Vector3 direction = axis;
 
-                if (goPainter.GetSceneCamAxisPolarity() > 0) direction *= -1;
-                if (axis == Vector3.forward) direction *= -1;
+                if (goPainter.GetSceneCamAxisPolarity() > 0)
+                {
+                    direction *= -1;
+                }
+                if (axis == Vector3.forward)
+                {
+                    direction *= -1;
+                }
 
                 hits = Physics.RaycastAll(go.transform.position + direction * maxHeightToCastDownFrom, -direction, maxHeightToCastDownFrom * 10, layerMask);
                 RaycastHit nearestHit = new RaycastHit();
